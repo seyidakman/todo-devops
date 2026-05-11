@@ -1,0 +1,32 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodu çek
+        uses: actions/checkout@v4
+
+      - name: Docker image build et
+        run: docker build -t todo-api:test .
+
+      - name: Container başlat
+        run: |
+          docker run -d \
+            --name todo-test \
+            -p 5000:5000 \
+            todo-api:test
+
+      - name: Bekle
+        run: sleep 10
+
+      - name: Health check
+        run: curl -f http://localhost:5000/health
+
+      - name: Temizle
+        run: docker stop todo-test && docker rm todo-test
